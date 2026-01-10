@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Excel - Certificados</title>
+    <!-- Simple flexible CSS -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .file-input-wrapper {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Cargar Participantes (Excel)</h2>
+
+        <form method="POST" action="/upload" enctype="multipart/form-data">
+            <div class="file-input-wrapper">
+                <input type="file" name="file" accept=".xlsx, .xls" required />
+            </div>
+            <button type="submit">Subir Archivo</button>
+        </form>
+
+        <div th:if="${message}" class="message success">
+            <p th:text="${message}"></p>
+            <div style="margin-top: 15px;">
+                <a href="/download-certificates" class="button"
+                    style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">Descargar
+                    Certificados (ZIP)</a>
+            </div>
+        </div>
+
+        <div th:if="${errorList}" class="message error">
+            <h4>Errores encontrados:</h4>
+            <ul>
+                <li th:each="err : ${errorList}" th:text="${err}"></li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+
+</html>
