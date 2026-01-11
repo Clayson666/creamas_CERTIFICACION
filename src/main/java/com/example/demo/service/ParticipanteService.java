@@ -57,14 +57,9 @@ public class ParticipanteService {
                 return new ProcessingResult(errors, savedIds);
             }
 
-            // Start from row 2 (index 1)
+            // FASE 1: VALIDACIÓN
+            // Recorremos todas las filas para validar antes de guardar nada.
             for (int i = 1; i <= lastRow; i++) {
-                // ... (Parsing logic remains the same, omitted for brevity in tool call context
-                // if not verifying)
-                // Need to re-include the loop logic to avoid deleting it.
-                // Since replace_file_content replaces a block, I must include the whole method
-                // body or carefully target chunks.
-                // Given the size, let's rewrite the method body carefully.
                 Row row = sheet.getRow(i);
                 if (row == null || isRowEmpty(row)) {
                     continue;
@@ -92,10 +87,10 @@ public class ParticipanteService {
                     equipoValor = "NINGUNO";
                 }
 
-                // Logging
-                System.out.println("Reading Row " + i + ": " + nombres + " " + apellidos + " DNI:" + dni);
-
+                // Identificar errores en la fila actual
                 StringBuilder rowError = new StringBuilder();
+
+                // Validar Datos Obligatorios y Tamaño de DNI
                 if (isEmpty(nombres))
                     rowError.append("Nombres es obligatorio. ");
                 if (isEmpty(apellidos))
@@ -120,6 +115,7 @@ public class ParticipanteService {
                 if (isEmpty(programa))
                     rowError.append("Programa es obligatorio. ");
 
+                // Si hay errores en esta fila, los agregamos a la lista global de errores
                 if (rowError.length() > 0) {
                     String msg = "Fila " + (i + 1) + ": " + rowError.toString();
                     errors.add(msg);
@@ -127,6 +123,7 @@ public class ParticipanteService {
                     continue;
                 }
 
+                // Si la fila está OK, preparamos el objeto
                 Participante p = new Participante();
                 p.setNombres(nombres);
                 p.setApellidos(apellidos);
@@ -142,30 +139,31 @@ public class ParticipanteService {
                 participantes.add(p);
             }
 
+            // FASE 2: GUARDADO
+            // Solo si NO hay errores en ninguna fila, procedemos a guardar.
             if (errors.isEmpty()) {
                 if (participantes.isEmpty()) {
                     errors.add("No se encontraron participantes válidos para guardar.");
                 } else {
-                    int count = 0;
-                    for (Participante p : participantes) {
-                        try {
-                            Participante saved = repository.save(p);
+                    try {
+                        System.out
+                                .println("Validación exitosa. Guardando " + participantes.size() + " participantes...");
+                        List<Participante> savedList = repository.saveAll(participantes);
+                        for (Participante saved : savedList) {
                             savedIds.add(saved.getId());
-                            count++;
-                            System.out.println("Guardando participante en BD: " + p.getNombres() + " "
-                                    + p.getApellidos() + " (CODE: " + p.getCodigoVerificacion() + ")");
-                        } catch (Exception e) {
-                            System.err.println("Error al guardar participante: " + e.getMessage());
-                            e.printStackTrace();
                         }
+                        System.out.println("Proceso finalizado. Total guardados: " + savedIds.size());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        // Si falla el guardado masivo, retornamos error general y la transacción
+                        // debería hacer rollback
+                        errors.add("Error crítico al guardar en base de datos: " + e.getMessage());
+                        // Limpiamos savedIds para indicar que no se 'confirmó' el éxito
+                        savedIds.clear();
                     }
-                    System.out.println("Proceso finalizado. Total guardados: " + count);
                 }
             } else {
-                System.out.println("No se guardó nada debido a errores de validación.");
-                for (String err : errors) {
-                    System.out.println(" > " + err);
-                }
+                System.out.println("No se guardó nada debido a errores de validación en " + errors.size() + " filas.");
             }
 
         } catch (IOException e) {

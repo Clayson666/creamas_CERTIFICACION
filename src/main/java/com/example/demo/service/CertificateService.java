@@ -142,6 +142,27 @@ public class CertificateService {
 
             // showTextAligned ignora los márgenes y lo estampa en la coordenada exacta
             canvas.showTextAligned(Element.ALIGN_LEFT, footerText, x, y, 0);
+
+            // --- DEUDA TÉCNICA: AGREGAR HEADER (ID y FECHA) ---
+            canvas.setFontAndSize(FontFactory.getFont(FontFactory.HELVETICA).getBaseFont(), 10);
+
+            // Posición Header
+            float headerLeftX = mmToPt(20);
+            float headerRightX = document.getPageSize().getWidth() - mmToPt(20);
+            float headerTopY = document.getPageSize().getHeight() - mmToPt(25) - 15; // Bajar 4 puntos extra
+
+            String idCertificado = "ID certificado: " + p.getCodigoVerificacion();
+
+            // Fecha actual formateada
+            LocalDate now = LocalDate.now();
+            String mesActual = now.getMonth().getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-PE"));
+            String fechaTexto = "Lima, " + now.getDayOfMonth() + " de " + mesActual + " del " + now.getYear();
+
+            // Dibujar ID a la izquierda
+            canvas.showTextAligned(Element.ALIGN_LEFT, idCertificado, headerLeftX, headerTopY, 0);
+            // Dibujar Fecha a la derecha (Misma altura Y)
+            canvas.showTextAligned(Element.ALIGN_RIGHT, fechaTexto, headerRightX, headerTopY, 0);
+
             canvas.endText();
 
             document.close();

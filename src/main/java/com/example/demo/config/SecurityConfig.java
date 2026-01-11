@@ -10,20 +10,25 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll() // Allow static
-                                                                                                       // resources
-                        .anyRequest().authenticated())
-                .formLogin((form) -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/upload", true)
-                        .permitAll())
-                .logout((logout) -> logout
-                        .permitAll());
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                // 1. DESHABILITAR CSRF (Esto suele arreglar el 403 en local)
+                                .csrf(csrf -> csrf.disable())
 
-        return http.build();
-    }
+                                .authorizeHttpRequests((requests) -> requests
+                                                // 2. PERMITIR RECURSOS ESTÁTICOS Y LA RUTA DE ERROR
+                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**",
+                                                                "/error")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .formLogin((form) -> form
+                                                .loginPage("/login")
+                                                .defaultSuccessUrl("/upload", true)
+                                                .permitAll())
+                                .logout((logout) -> logout
+                                                .permitAll());
+
+                return http.build();
+        }
 }
