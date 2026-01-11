@@ -34,7 +34,7 @@ public class CertificateService {
             for (Participante p : participantes) {
                 try {
                     String safeName = (p.getNombres() + "_" + p.getApellidos()).replaceAll("[^a-zA-Z0-9]", "_");
-                    String filename = p.getDni() + "_" + safeName + ".pdf";
+                    String filename = safeName + ".pdf";
 
                     zos.putNextEntry(new ZipEntry(filename));
                     byte[] pdfBytes = generateCertificatePdf(p);
